@@ -1,3 +1,4 @@
 wget>=3.2
 MailTm>=0.0.81
 requests>=2.28.1
+Faker>=18.11.2
