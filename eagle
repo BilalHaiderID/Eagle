@@ -1,0 +1,249 @@
+#!/bin/python3
+#author:@bilalhaiderid
+#_________[ IMPORTING MODULES ]_________>>
+from faker import Faker
+from mailtm import Email
+import wikipedia as wiki
+from bs4 import BeautifulSoup
+import os,sys,re,json,time,wget
+from googlesearch import search
+import duckduckgo_search as ddgo
+import random,requests,subprocess
+#_________[ BASIC COLOURS ]_________>>
+coloff = "\033[0m"         # NoColour
+red = "\033[1;31m"         # Red
+green = "\033[1;32m"       # Green
+white = "\033[1;37m"       # Blue
+blue = "\033[1;34m"        # White
+script_data = {
+    "colour":"green",
+    "version":"0.0.5",
+    "creater":"@bilalhaiderid",
+    "github":"https://github.com/BilalHaiderID/Eagle"
+}
+script_config = {
+    "VERIPHONE_APKKEY":"74D5EC4B33674517A365EF5CC50060DC",
+    "ABSTRACT_EMAIL_APIKEY":"4d531ce494fc4146a2bbe5086d1364b7",
+    "ABSTRACT_IBAN_APIKEY":"1a13909c54f94afeb85a84fe5e32e76c"
+}
+if script_data['colour'] == 'green':maincol = green
+elif str(script_data['colour']) == 'red':maincol = red
+elif str(script_data['colour']) == 'white':maincol = white
+elif str(script_data['colour']) == 'blue':maincol = blue
+elif str(script_data['colour']) == '':maincol = coloff
+#_________[ MAILTM ]_________>>
+def mailTm_listener(message):
+    print(f"[{maincol}+{coloff}] Subject: " + message['subject'])
+    print(f"[{green}+{coloff}] Content: " + message['text'] if message['text'] else message['html'])
+def mailTM():
+    logo()
+    username = input(f"[{maincol}+{coloff}] Input Username [Random] : ")
+    password = input(f"[{maincol}+{coloff}] Input Password [Random] : ")
+    domain = input(f"[{maincol}+{coloff}] Input Domain [exelica.com] : ")
+    mail = Email()
+    if username in ['',' ']:username=None
+    if password in ['',' ']:password=None
+    if domain in ['',' ']:domain=None
+    mail.register(username=username,password=password,domain=domain)
+    print(f"\n[{maincol}+{coloff}] Email Adress: " + str(mail.address))
+    print(f"[{maincol}+{coloff}] Waiting for new emails...")
+    print(f"{coloff}----------------------------------------------------")
+    mail.start(mailTm_listener)
+#_________[ TOKEN PER ]_________>>
+def req_info_token(cookie,token):
+    session = requests.Session()
+    try:
+        url    = 'https://developers.facebook.com/tools/debug/accesstoken/?access_token=%s&version=v15.0'%(token)
+        req = BeautifulSoup(session.get(url,cookies={'cookie':cookie}).content,'html.parser')
+        crf = req.find('a',href='/docs/reference/login/#permissions').text
+        print(f"[{maincol}+{coloff}] Permissions : {maincol}{crf}{coloff}")
+    except Exception as e:
+        print(f"{e}")
+#_________[ TOKEN GENERATE ]_________>>
+def generate_token():
+    logo()
+    cookie = input(f'[{maincol}->{coloff}] Input Cookie : ')
+    session = requests.Session()
+    try:
+        url = 'https://www.facebook.com/adsmanager/manage/campaigns'
+        req = session.get(url,cookies={'cookie':cookie})
+        set = re.search('act=(.*?)&nav_source',str(req.content)).group(1)
+        nek = '%s?act=%s&nav_source=no_referrer'%(url,set)
+        roq = session.get(nek,cookies={'cookie':cookie})
+        token = re.search('accessToken="(.*?)"',str(roq.content)).group(1)
+        # print(f"{coloff}{'EAAB':-^54}")
+        print(f"{coloff}----------------------------------------------------")
+        print(f"[{maincol}+{coloff}] EAAB Token : {maincol}{token}{coloff}")
+        req_info_token(cookie,token)
+    except Exception as e:
+        print(f'{e}')
+    try:
+        url = 'https://business.facebook.com/business_locations'
+        req = session.get(url,cookies={'cookie':cookie})
+        token = re.search('(\["EAAG\w+)', req.text).group(1).replace('["','')
+        print(f"{coloff}----------------------------------------------------")
+        print(f"[{maincol}+{coloff}] EAAG Token : {maincol}{token}{coloff}")
+        req_info_token(cookie,token)
+    except Exception as e:
+        print(f'{e}')
+    try:
+        url = 'https://www.facebook.com/events_manager2/overview'
+        req = session.get(url,cookies={'cookie':cookie})
+        token = re.search('{"accessToken":"(EAAd\w+)',req.text).group(1)
+        print(f"{coloff}----------------------------------------------------")
+        print(f"[{maincol}+{coloff}] EAAD Token : {maincol}{token}{coloff}")
+        req_info_token(cookie,token)
+    except Exception as e:
+        print(f'{e}')
+#_________[ FAKE INFO ]_________>>
+def fake_info():
+    logo()
+    fake = Faker()
+    address = str(fake.address()).replace('\n','')
+    print(f'[{maincol}+{coloff}] Name : {fake.name()}')
+    print(f"[{maincol}+{coloff}] Address : {address}")
+    print(f'[{maincol}+{coloff}] Email : {fake.email()}')
+    print(f'[{maincol}+{coloff}] City : {fake.city()}')
+    print(f'[{maincol}+{coloff}] Country : {fake.country()}')
+    print(f'[{maincol}+{coloff}] Country Code : {fake.country_code()}')
+    print(f'[{maincol}+{coloff}] Date OF Birth : {fake.date_of_birth()}')
+    print(f'[{maincol}+{coloff}] Domain Name : {fake.domain_name()}')
+    print(f'[{maincol}+{coloff}] Image URL : {fake.image_url()}')
+    print(f'[{maincol}+{coloff}] IPv4 : {fake.ipv4()}')
+    print(f'[{maincol}+{coloff}] IPv6 : {fake.ipv6()}')
+    print(f'[{maincol}+{coloff}] Phone Number : {fake.phone_number()}')
+    print(f'[{maincol}+{coloff}] Password : {fake.password()}')
+    print(f'[{maincol}+{coloff}] Timezone : {fake.timezone()}')
+    print(f'[{maincol}+{coloff}] Zipcode : {fake.zipcode()}')
+#_________[ PHONEINFOGA ]_________>>
+def phoneinfoga():
+    logo()
+    phone_number = input(f"[{maincol}+{coloff}] Input Mobile Number : ")
+    params = {
+        'phone':phone_number.strip(),
+        'key':script_config['VERIPHONE_APKKEY']
+        }
+    phoneinfo = requests.get(f"https://api.veriphone.io/v2/verify",params=params).json()
+    print(f"{coloff}----------------------------------------------------")
+    for keys,values in phoneinfo.items():
+        print(f"[{maincol}+{coloff}] {(keys.replace('_',' ')).capitalize()} : {values}")
+    print(f"{coloff}----------------------------------------------------")
+#_________[ IPINFOGA ]_________>>
+def ipinfoga():
+    logo()
+    print(f"[{maincol}*{coloff}] Your IPv4 : {os.popen('curl ifconfig.co --silent').readline().strip()}")
+    print(f"{coloff}----------------------------------------------------")
+    target_ip = input(f"[{maincol}+{coloff}] Input Ip Address : ")
+    ipinfoga = requests.get(f"https://ipinfo.io/{target_ip.strip()}/json").json()
+    print(f"{coloff}----------------------------------------------------")
+    for keys,values in ipinfoga.items():
+        if keys != 'readme':
+            print(f"[{maincol}+{coloff}] {(keys.replace('_',' ')).capitalize()} : {values}")
+    print(f"{coloff}----------------------------------------------------")
+#_________[ EMAILINFOGA ]_________>>
+def email_validator():
+    logo()
+    email = input(f"[{maincol}+{coloff}] Input Email Address : ")
+    params = {
+        'api_key':script_config['ABSTRACT_EMAIL_APIKEY'],
+        'email':email.strip(),
+        'auto_correct':'true'
+        }
+    emailinfoga = requests.get(f"https://emailvalidation.abstractapi.com/v1/",params=params).json()
+    print(f"{coloff}----------------------------------------------------")
+    for keys,values in emailinfoga.items():
+        print(f"[{maincol}+{coloff}] {(keys.replace('_',' ')).capitalize()} : {values}")
+    print(f"{coloff}----------------------------------------------------")
+#_________[ IBAN VALIDATION ]_________>>
+def IBAN_validation():
+    logo()
+    ibam = input(f"[{maincol}+{coloff}] Input IBA Number : ")
+    params = {
+        'api_key':script_config['ABSTRACT_IBAN_APIKEY'],
+        'iban':ibam.strip(),
+        }
+    ibaninfoga = requests.get(f"https://ibanvalidation.abstractapi.com/v1/",params=params).json()
+    print(f"{coloff}----------------------------------------------------")
+    for keys,values in ibaninfoga.items():
+        print(f"[{maincol}+{coloff}] {(keys.replace('_',' ')).capitalize()} : {values}")
+    print(f"{coloff}----------------------------------------------------")
+#_________[ SEARCH X ]_________>>
+def search_x():
+    number = 1
+    logo()
+    query = input(f'[{maincol}+{coloff}] Input Keyword && Query : ').strip().split('--')
+    print(f"{coloff}----------------------------------------------------")
+    for words in query: #\n
+        results = search(words,num_results=20,sleep_interval=5,advanced=True)
+        print(f"[{maincol}*{coloff}] Google Search Result [{words}]: ")
+        for result in results:
+            print(f" [{maincol}*{coloff}] Title {maincol}{number}{coloff} : {result.title} ")
+            print(f" [{maincol}*{coloff}] URL : {result.url}")
+            print(f" [{maincol}*{coloff}] Description : {result.description}\n")
+            number +=1
+        summary = wiki.summary(words)
+        page = wiki.page(words)
+        print(f'[{maincol}+{coloff}] Wikipedia : ')
+        print(f"{coloff}----------------------------------------------------")
+        print(f'\t\t{summary}')
+        print(f' [{maincol}*{coloff}] Title : {page.title}')
+        print(f' [{maincol}*{coloff}] URL : {page.url}')
+        print(f' [{maincol}*{coloff}] Description : {page.content}')
+        duckgo_search = ddgo.DDGS()
+        results = duckgo_search.text(words)
+        print(f"{coloff}----------------------------------------------------")
+        print(f"[{maincol}*{coloff}] DuckDuckGo Search Result [{words}]: ")
+        for result in results:
+            title0 = (result['title']).split('-')[0]
+            try:title1 = (result['title']).split('-')[1]
+            except IndexError:title1 = 'None'
+            url = result['href']
+            content = result['body']
+            print(f' [{maincol}*{coloff}] Title : {title1} [ {maincol}{title0}{coloff} ]')
+            print(f' [{maincol}*{coloff}] URL : {url}')
+            print(f' [{maincol}*{coloff}] Description : {content}')
+#_________[ LOGO ]_________>>
+def logo(time_sleep=0.5):
+    time.sleep(time_sleep)
+    os.system("clear")
+    time.sleep(time_sleep)
+    print(f"""{coloff}
+   ___________              .__          
+   \_   _____/____     ____ |  |   ____  
+    |    __)_\__  \   / ___\|  | _/ __ \ 
+    |        \/ __ \_/ /_/  >  |_\  ___/ 
+   /_______  (____  /\___  /|____/\___  >
+           \/     \//_____/           \/  {maincol} {script_data['version']} {coloff}""")
+    print(f"{coloff}----------------------------------------------------")
+    print(f"{maincol} No Technology thats connected to internet is{coloff}")
+    print(f"{maincol}                  Unhackable{coloff}")
+    print(f"{coloff}----------------------------------------------------")
+#_________[ MAIN MENU ]_________>>
+def main():
+    logo()
+    print("[{}01{}] Temporary Email".format(maincol,coloff))
+    print("[{}02{}] Search Query [google,wikipedia,duckduckgo]".format(maincol,coloff))
+    print("[{}03{}] IBAN Conformation".format(maincol,coloff))
+    print("[{}04{}] Email Conformation".format(maincol,coloff))
+    print("[{}05{}] IP Information Gathring".format(maincol,coloff))
+    print("[{}06{}] PhoneNumber Information Gathring".format(maincol,coloff))
+    print("[{}07{}] Fake Profile Information".format(maincol,coloff))
+    print("[{}08{}] Facebook Token Generation".format(maincol,coloff))
+    # print("[{}09{}] ".format(maincol,coloff))
+    # print("[{}10{}] ".format(maincol,coloff))
+    # print("[{}11{}] ".format(maincol,coloff))
+    # print("[{}12{}] ".format(maincol,coloff))
+    print(f"{coloff}----------------------------------------------------")
+    maininp = input(f"[{green}->{coloff}] Select in option : ")
+    if maininp in ['1','01']:mailTM()
+    elif maininp in ['2','02']:search_x()
+    elif maininp in ['3','03']:IBAN_validation()
+    elif maininp in ['4','04']:email_validator()
+    elif maininp in ['5','05']:ipinfoga()
+    elif maininp in ['6','06']:phoneinfoga()
+    elif maininp in ['7','07']:fake_info()
+    elif maininp in ['8','08']:generate_token()
+
+
+if __name__=='__main__':
+    main()
